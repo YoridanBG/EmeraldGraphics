@@ -6,6 +6,7 @@
 //
 
 #include "kern_start.hpp"
+#include "NVDAResmen.hpp"
 
 static EMRLD emrldInstance;
 EMRLD *EMRLD::callbackEMRLD;
@@ -116,7 +117,11 @@ void EMRLD::deinit() {
     DBGLOG(MODULE_ERROR, "This kernel extension cannot be disabled this way!");
     SYSLOG(MODULE_ERROR, "This kernel extension cannot be disabled this way!");
 }
+void EMRLD::initingNVDA(){
+    SYSLOG(MODULE_INIT,"Initialising NVDAResmen");
+    NVDAResman::init();
 
+}
 const char *bootargOff[] {
     "-emrldoff"
 };

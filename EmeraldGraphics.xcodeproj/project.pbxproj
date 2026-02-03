@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EADB46A92F3274EA00FFA874 /* NVDAResmen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EADB46A72F3274EA00FFA874 /* NVDAResmen.cpp */; };
+		EADB46AA2F3274EA00FFA874 /* NVDAResmen.hpp in Headers */ = {isa = PBXBuildFile; fileRef = EADB46A82F3274EA00FFA874 /* NVDAResmen.hpp */; };
 		F0B769802CFC445C00043DD0 /* plugin_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F0B7697E2CFC445200043DD0 /* plugin_start.cpp */; };
 		FB4A5A712CBF19B100D5B696 /* kern_start.hpp in Headers */ = {isa = PBXBuildFile; fileRef = FB4A5A702CBF19B100D5B696 /* kern_start.hpp */; };
 		FB5C28782CFD5D0F00A3C58E /* hde32.h in Headers */ = {isa = PBXBuildFile; fileRef = F0B769612CFC43F800043DD0 /* hde32.h */; };
@@ -37,6 +39,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EADB46A72F3274EA00FFA874 /* NVDAResmen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NVDAResmen.cpp; sourceTree = "<group>"; };
+		EADB46A82F3274EA00FFA874 /* NVDAResmen.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = NVDAResmen.hpp; sourceTree = "<group>"; };
 		F0B769562CFC43F800043DD0 /* arm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = arm.h; sourceTree = "<group>"; };
 		F0B769572CFC43F800043DD0 /* arm64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = arm64.h; sourceTree = "<group>"; };
 		F0B769582CFC43F800043DD0 /* capstone.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = capstone.h; sourceTree = "<group>"; };
@@ -189,6 +193,8 @@
 				FB898C8F2CBBE85700927629 /* Info.plist */,
 				FB898C8D2CBBE85700927629 /* kern_start.cpp */,
 				FB4A5A702CBF19B100D5B696 /* kern_start.hpp */,
+				EADB46A72F3274EA00FFA874 /* NVDAResmen.cpp */,
+				EADB46A82F3274EA00FFA874 /* NVDAResmen.hpp */,
 			);
 			path = EmeraldGraphics;
 			sourceTree = "<group>";
@@ -212,6 +218,7 @@
 				FB4A5A712CBF19B100D5B696 /* kern_start.hpp in Headers */,
 				FB5C28782CFD5D0F00A3C58E /* hde32.h in Headers */,
 				FB5C28792CFD5D0F00A3C58E /* hde64.h in Headers */,
+				EADB46AA2F3274EA00FFA874 /* NVDAResmen.hpp in Headers */,
 				FB5C287A2CFD5D0F00A3C58E /* kern_api.hpp in Headers */,
 				FB5C287B2CFD5D0F00A3C58E /* kern_compat.hpp in Headers */,
 				FB5C287C2CFD5D0F00A3C58E /* kern_compression.hpp in Headers */,
@@ -344,6 +351,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0B769802CFC445C00043DD0 /* plugin_start.cpp in Sources */,
+				EADB46A92F3274EA00FFA874 /* NVDAResmen.cpp in Sources */,
 				FB898C8E2CBBE85700927629 /* kern_start.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

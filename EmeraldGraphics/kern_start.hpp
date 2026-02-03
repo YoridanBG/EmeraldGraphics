@@ -45,6 +45,7 @@ public:
      */
     void init();
     void deinit();
+    void initingNVDA();
     
     /**
     * Publicly accessible internal build flag
