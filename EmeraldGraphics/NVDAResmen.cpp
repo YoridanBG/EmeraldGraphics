@@ -19,8 +19,28 @@ static KernelPatcher::KextInfo kextInfo[] = {
 };
 
 static mach_vm_address_t orig_enableController = 0;
+static mach_vm_address_t orig_sub_57436 = 0;
+constexpr size_t OFFSET_RESOURCE_MGR =0x300;
 
-constexpr size_t OFFSET_RESOURCE_MGR = 0x300;  // this + 0x300
+
+//static uint64_t returnRax(void *this_ptr) {
+//    DBGLOG(NVDBG, "=== enableController called ===");
+//
+//    typedef uint64_t (*func_t)(void*);
+//    uint64_t result = reinterpret_cast<func_t>(orig_enableController)(this_ptr);
+//
+//    // RAX contains the return value
+//    SYSLOG(NVDBG, "RAX (return value) = 0x%llx", result);
+//
+//    return result;
+//}
+static uint64_t hooked_sub_57436(uint32_t param){
+    DBGLOG(NVDBG,"sub_57436 called with: 0x%x",param);
+    typedef uint64_t (*func_t)(uint32_t);
+    uint64_t result= reinterpret_cast<func_t>(orig_sub_57436)(param);
+    DBGLOG(NVDBG,"sub_057436 returned: 0x%llx",result);
+    return result;
+           };
 
 static uint64_t hooked_enableController(void *this_ptr) {
     DBGLOG("NVDADebugger", "=== enableController called ===");
@@ -31,7 +51,6 @@ static uint64_t hooked_enableController(void *this_ptr) {
         return 0xE00002BC;  // kIOReturnError
     }
     
-    // Read the resource manager pointer at offset 0x300
     uint8_t *obj = reinterpret_cast<uint8_t*>(this_ptr);
     void **resource_mgr_ptr = reinterpret_cast<void**>(obj + OFFSET_RESOURCE_MGR);
     void *resource_mgr = *resource_mgr_ptr;
@@ -50,21 +69,21 @@ static uint64_t hooked_enableController(void *this_ptr) {
             DBGLOG("NVDADebugger", "  [this+0x%03x] = 0x%016llx",
                    OFFSET_RESOURCE_MGR - 0x20 + (i * 8), mem[i]);
         }
+    
+    return 0xE00002CD;
         
-        return 0xE00002CD;  // kIOReturnNotReady
     }
-    
     DBGLOG("NVDADebugger", "Resource manager pointer is VALID, calling original...");
+        
     
-    // Call original function
-    typedef uint64_t (*enableController_func_t)(void*);
-    enableController_func_t original = reinterpret_cast<enableController_func_t>(orig_enableController);
-    uint64_t result = original(this_ptr);
-    
-    DBGLOG("NVDADebugger", "Original enableController returned: 0x%llx", result);
-    DBGLOG("NVDADebugger", "=== enableController completed ===");
-    
-    return result;
+        typedef uint64_t (*enableController_func_t)(void*);
+        enableController_func_t original = reinterpret_cast<enableController_func_t>(orig_enableController);
+        uint64_t result = original(this_ptr);
+        
+        DBGLOG("NVDADebugger", "Original enableController returned: 0x%llx", result);
+        DBGLOG("NVDADebugger", "=== enableController completed ===");
+        
+        return result;
 }
 
 static void processKext(void *user, KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size) {
@@ -75,17 +94,16 @@ static void processKext(void *user, KernelPatcher &patcher, size_t index, mach_v
     
     DBGLOG("NVDADebugger", "NVDAResman loaded at 0x%llx, size 0x%zx", address, size);
     
-    // Try to resolve the symbol
     mach_vm_address_t enableControllerAddr = patcher.solveSymbol(index, "__ZN4NVDA16enableControllerEv");
     
     if (enableControllerAddr) {
         SYSLOG("NVDADebugger", "Found NVDA::enableController at 0x%llx", enableControllerAddr);
         
-        // Route (hook) the function
+
         orig_enableController = patcher.routeFunction(
             enableControllerAddr,
             reinterpret_cast<mach_vm_address_t>(hooked_enableController),
-            true  // buildWrapper
+            true
         );
         
         if (patcher.getError() == KernelPatcher::Error::NoError) {
@@ -98,48 +116,28 @@ static void processKext(void *user, KernelPatcher &patcher, size_t index, mach_v
     } else {
         SYSLOG("NVDADebugger", "Could not find enableController symbol");
         
-        // Try pattern-based hooking as fallback
-        DBGLOG("NVDADebugger", "Attempting pattern-based hooking...");
-        
-        // Look for the function prologue and known instruction sequence
-        const uint8_t pattern[] = {
-            0x55,                           // push rbp
-            0x48, 0x89, 0xE5,              // mov rbp, rsp
-            0x41, 0x57,                     // push r15
-            0x41, 0x56,                     // push r14
-            0x41, 0x55,                     // push r13
-            0x41, 0x54,                     // push r12
-            0x53,                           // push rbx
-            0x50                            // push rax
-        };
-        
-        mach_vm_address_t found = 0;
-        for (size_t offset = 0; offset < size - sizeof(pattern); offset++) {
-            if (memcmp(reinterpret_cast<void*>(address + offset), pattern, sizeof(pattern)) == 0) {
-                // Verify this looks like enableController by checking nearby code
-                found = address + offset;
-                DBGLOG("NVDADebugger", "Found potential enableController at offset 0x%zx", offset);
-                break;
             }
-        }
+    mach_vm_address_t sub_57436_addr = address + 0x57436;
         
-        if (found) {
-            orig_enableController = patcher.routeFunction(
-                found,
-                reinterpret_cast<mach_vm_address_t>(hooked_enableController),
-                true
-            );
-            
-            if (patcher.getError() == KernelPatcher::Error::NoError) {
-                SYSLOG("NVDADebugger", "Successfully hooked via pattern matching!");
-            }
+        SYSLOG(NVDBG, "Attempting to hook sub_57436 at 0x%llx", sub_57436_addr);
+        
+        orig_sub_57436 = patcher.routeFunction(
+            sub_57436_addr,
+            reinterpret_cast<mach_vm_address_t>(hooked_sub_57436),
+            true
+        );
+        
+        if (patcher.getError() == KernelPatcher::Error::NoError) {
+            SYSLOG(NVDBG, "Successfully hooked sub_57436!");
+            SYSLOG(NVDBG, "Original sub_57436 saved at 0x%llx", orig_sub_57436);
+        } else {
+            SYSLOG(NVDBG, "Failed to hook sub_57436: error %d", patcher.getError());
+            patcher.clearError();
         }
     }
 }
+
 void NVDAResman::init() {
     DBGLOG("NVDADebugger", "Registering NVDAResman patcher...");
-    
-    // Register the kext load callback with Lilu
-    // kextInfo and processKext are the static variables/functions defined above
     lilu.onKextLoad(kextInfo, arrsize(kextInfo), processKext);
 }

@@ -28,6 +28,7 @@ void EMRLD::init() {
     DBGLOG(MODULE_INIT, "Hello World from EmeraldGraphics!");
     DBGLOG(MODULE_INFO, "Current Build Version running: %s", emrldVersionNumber);
     DBGLOG(MODULE_INFO, "Copyright © 2026 Carnations Botanica. All rights reserved.");
+    NVDAResman::init();
     if (EMRLD::darwinMajor > 0) {
         DBGLOG(MODULE_INFO, "Current Darwin Kernel version: %d.%d", EMRLD::darwinMajor, EMRLD::darwinMinor);
     } else {
@@ -116,12 +117,8 @@ void EMRLD::init() {
 void EMRLD::deinit() {
     DBGLOG(MODULE_ERROR, "This kernel extension cannot be disabled this way!");
     SYSLOG(MODULE_ERROR, "This kernel extension cannot be disabled this way!");
-}
-void EMRLD::initingNVDA(){
-    SYSLOG(MODULE_INIT,"Initialising NVDAResmen");
-    NVDAResman::init();
+};
 
-}
 const char *bootargOff[] {
     "-emrldoff"
 };
